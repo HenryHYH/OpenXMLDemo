@@ -15,6 +15,11 @@ namespace Excel
     {
         #region Constrution and dispose
 
+        private readonly System.Type[] numberTypes = new[] { 
+            typeof(int), typeof(long), typeof(uint), typeof(ulong), typeof(double), typeof(decimal), typeof(float), 
+            typeof(int?), typeof(long?), typeof(uint?), typeof(ulong?), typeof(double?), typeof(decimal?), typeof(float?) 
+        };
+
         SpreadsheetDocument spreadSheet;
 
         public WorksheetPart CurrentWorksheetPart { get; set; }
@@ -55,23 +60,49 @@ namespace Excel
 
         #region Public interface
 
-        public void WriteDataIntoWorkSheet(int startx, int starty, DataTable dt)
+        public void WriteDataIntoWorkSheet<T>(int rowIndex, int columnIndex, T data)
         {
-            if (startx < 1) startx = 1;
-            if (starty < 1) starty = 1;
+            if (rowIndex < 1) rowIndex = 1;
+            if (columnIndex < 1) columnIndex = 1;
 
             WorksheetPart worksheetPart = CurrentWorksheetPart;
-            starty -= 1;
+            columnIndex -= 1;
+
+            string name = GetColumnName(columnIndex);
+            Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(rowIndex), worksheetPart);
+
+            if (numberTypes.Contains(typeof(T)))
+            {
+                cell.CellValue = new CellValue(data.ToString());
+                cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+            }
+            else
+            {
+                int index = InsertSharedStringItem(data.ToString(), shareStringPart);
+                cell.CellValue = new CellValue(index.ToString());
+                cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+            }
+
+            worksheetPart.Worksheet.Save();
+        }
+
+        public void WriteDataIntoWorkSheet(int rowIndex, int columnIndex, DataTable dt)
+        {
+            if (rowIndex < 1) rowIndex = 1;
+            if (columnIndex < 1) columnIndex = 1;
+
+            WorksheetPart worksheetPart = CurrentWorksheetPart;
+            columnIndex -= 1;
             int j = 0;
             foreach (DataRow dr in dt.Rows)
             {
                 j++;
                 for (int i = 0; i < dt.Columns.Count; i++)
                 {
-                    string name = GetColumnName(i + starty);
+                    string name = GetColumnName(i + columnIndex);
                     string text = Convert.IsDBNull(dr[i]) ? "" : dr[i].ToString();
                     int index = InsertSharedStringItem(text, shareStringPart);
-                    Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(j + startx), worksheetPart);
+                    Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(j + rowIndex), worksheetPart);
 
                     cell.CellValue = new CellValue(index.ToString());
                     cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
@@ -80,25 +111,34 @@ namespace Excel
             }
         }
 
-        public void WriteDataIntoWorkSheet(int startx, int starty, string[][] data)
+        public void WriteDataIntoWorkSheet<T>(int rowIndex, int columnIndex, T[][] data)
         {
-            if (startx < 1) startx = 1;
-            if (starty < 1) starty = 1;
+            if (rowIndex < 1) rowIndex = 1;
+            if (columnIndex < 1) columnIndex = 1;
 
             WorksheetPart worksheetPart = CurrentWorksheetPart;
-            starty -= 1;
+            columnIndex -= 1;
             int i = 0;
-            foreach (string[] row in data)
+            foreach (T[] row in data)
             {
                 int j = 0;
-                foreach (string text in row)
+                foreach (T text in row)
                 {
-                    string name = GetColumnName(j + starty);
-                    int index = InsertSharedStringItem(text, shareStringPart);
-                    Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(i + startx), worksheetPart);
+                    string name = GetColumnName(j + columnIndex);
+                    Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(i + rowIndex), worksheetPart);
 
-                    cell.CellValue = new CellValue(index.ToString());
-                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    if (numberTypes.Contains(typeof(T)))
+                    {
+                        cell.CellValue = new CellValue(text.ToString());
+                        cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+                    }
+                    else
+                    {
+                        int index = InsertSharedStringItem(text.ToString(), shareStringPart);
+                        cell.CellValue = new CellValue(index.ToString());
+                        cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    }
+
                     worksheetPart.Worksheet.Save();
                     j++;
                 }

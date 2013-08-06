@@ -1,7 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Excel.aspx.cs" Inherits="Web.Excel" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ExcelPage.aspx.cs" Inherits="Web.ExcelPage" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title></title>
@@ -9,7 +8,7 @@
 <body>
     <form id="form1" runat="server">
     <div>
-    
+        <asp:Label ID="lbMessage" runat="server" ForeColor="Red"></asp:Label>
     </div>
     </form>
 </body>

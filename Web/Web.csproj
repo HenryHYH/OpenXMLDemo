@@ -51,19 +51,16 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Excel.aspx" />
+    <Content Include="ExcelPage.aspx" />
     <Content Include="Web.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Excel.aspx.cs">
-      <DependentUpon>Excel.aspx</DependentUpon>
+    <Compile Include="ExcelPage.aspx.cs">
+      <DependentUpon>ExcelPage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ExcelPage.aspx.designer.cs">
+      <DependentUpon>ExcelPage.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
