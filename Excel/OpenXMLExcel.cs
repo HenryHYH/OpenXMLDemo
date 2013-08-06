@@ -26,11 +26,17 @@ namespace Excel
 
         SharedStringTablePart shareStringPart;
 
+        Stylesheet stylesheet;
+
         public OpenXMLExcel(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             WorkbookPart workbookPart = spreadSheet.AddWorkbookPart();
             workbookPart.Workbook = new Workbook();
+
+            workbookPart.AddNewPart<WorkbookStylesPart>();
+            stylesheet = workbookPart.WorkbookStylesPart.Stylesheet = new Stylesheet();
+            //InitStyleSheet();
 
             WorksheetPart worksheetPart = InsertWorksheet(spreadSheet.WorkbookPart);
 
@@ -56,6 +62,44 @@ namespace Excel
             spreadSheet.Dispose();
         }
 
+        public void InitStyleSheet()
+        {
+            /*
+            styleSheet.CellFormats = new CellFormats();
+            styleSheet.CellFormats.Count = 1;
+            CellFormat cf = new CellFormat();
+            styleSheet.CellFormats.Append(cf);
+             */
+
+
+            stylesheet.Fonts = new DocumentFormat.OpenXml.Spreadsheet.Fonts(
+                new Font(new FontSize() { Val = 32D }, new Color() { Theme = (UInt32Value)1U }, new FontName() { Val = "Calibri" },
+                        new FontFamily() { Val = 2 }, new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor })) { Count = (UInt32Value)1U };
+            stylesheet.Fills = new Fills(
+                new DocumentFormat.OpenXml.Spreadsheet.Fill(new DocumentFormat.OpenXml.Spreadsheet.PatternFill() { PatternType = PatternValues.None })) { Count = (UInt32Value)2U };
+            stylesheet.Borders = new Borders(
+                new Border(
+                    new DocumentFormat.OpenXml.Spreadsheet.LeftBorder(),
+                    new DocumentFormat.OpenXml.Spreadsheet.RightBorder(),
+                    new DocumentFormat.OpenXml.Spreadsheet.TopBorder(),
+                    new DocumentFormat.OpenXml.Spreadsheet.BottomBorder(), new DiagonalBorder())) { Count = (UInt32Value)1U };
+
+
+            stylesheet.CellFormats = new CellFormats() { Count = 2 };
+
+            CellFormat cf = stylesheet.CellFormats.AppendChild(new CellFormat());
+            cf.FontId = (UInt32Value)0U;
+            cf.BorderId = (UInt32Value)0U;
+            cf.FillId = (UInt32Value)0U;
+
+            cf = stylesheet.CellFormats.AppendChild(new CellFormat());
+            cf.FontId = (UInt32Value)0U;
+            cf.BorderId = (UInt32Value)0U;
+            cf.FillId = (UInt32Value)0U;
+
+            stylesheet.Save();
+        }
+
         #endregion
 
         #region Public interface
@@ -70,6 +114,7 @@ namespace Excel
 
             string name = GetColumnName(columnIndex);
             Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(rowIndex), worksheetPart);
+            cell.StyleIndex = 1;
 
             if (numberTypes.Contains(typeof(T)))
             {
