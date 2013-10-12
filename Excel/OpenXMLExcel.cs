@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Text.RegularExpressions;
 using System.Data;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Office2010.Drawing;
+using System.Drawing;
 
 namespace Excel
 {
@@ -64,16 +67,16 @@ namespace Excel
 
         private void InitStyleSheet()
         {
-            stylesheet.Fonts = new Fonts() { Count = 1 };
-            stylesheet.Fonts.Append(new Font(new FontSize() { Val = 11D }, new FontName() { Val = "Arial" }, new FontFamily() { Val = 2 }, new FontScheme() { Val = FontSchemeValues.Minor }, new Color() { Auto = true }));
+            stylesheet.Fonts = new DocumentFormat.OpenXml.Spreadsheet.Fonts() { Count = 1 };
+            stylesheet.Fonts.Append(new DocumentFormat.OpenXml.Spreadsheet.Font(new FontSize() { Val = 11D }, new FontName() { Val = "Arial" }, new DocumentFormat.OpenXml.Spreadsheet.FontFamily() { Val = 2 }, new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor }, new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }));
 
             // 程序会自动占用 FillId = 0 和 FillId = 1 的 Fill，0 为 无背景，1 为灰色花纹，自定义只能从 2 开始
             stylesheet.Fills = new Fills() { Count = 2 };
-            stylesheet.Fills.Append(new Fill(new PatternFill() { PatternType = PatternValues.None }));
-            stylesheet.Fills.Append(new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }));
+            stylesheet.Fills.Append(new DocumentFormat.OpenXml.Spreadsheet.Fill(new DocumentFormat.OpenXml.Spreadsheet.PatternFill() { PatternType = PatternValues.None }));
+            stylesheet.Fills.Append(new DocumentFormat.OpenXml.Spreadsheet.Fill(new DocumentFormat.OpenXml.Spreadsheet.PatternFill() { PatternType = PatternValues.Gray125 }));
 
             stylesheet.Borders = new Borders() { Count = 1 };
-            stylesheet.Borders.Append(new Border(new LeftBorder(), new RightBorder(), new TopBorder() { }, new BottomBorder(), new DiagonalBorder()));
+            stylesheet.Borders.Append(new Border(new DocumentFormat.OpenXml.Spreadsheet.LeftBorder(), new DocumentFormat.OpenXml.Spreadsheet.RightBorder(), new DocumentFormat.OpenXml.Spreadsheet.TopBorder() { }, new DocumentFormat.OpenXml.Spreadsheet.BottomBorder(), new DiagonalBorder()));
 
             stylesheet.CellFormats = new CellFormats() { Count = 1 };
             stylesheet.CellFormats.Append(new CellFormat() { FontId = 0, ApplyFont = true, FillId = 0, ApplyFill = true, BorderId = 0, ApplyBorder = true });
@@ -83,12 +86,12 @@ namespace Excel
 
         #region Public interface
 
-        public void WriteDataIntoWorkSheet<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null)
+        public void WriteData<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null)
         {
-            WriteDataIntoWorkSheet(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex);
+            WriteData(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex);
         }
 
-        public void WriteDataIntoWorkSheet(int rowIndex, int columnIndex, DataTable dt, uint? styleIndex = null)
+        public void WriteData(int rowIndex, int columnIndex, DataTable dt, uint? styleIndex = null)
         {
             if (rowIndex < 1) rowIndex = 1;
             if (columnIndex < 1) columnIndex = 1;
@@ -114,7 +117,7 @@ namespace Excel
             }
         }
 
-        public void WriteDataIntoWorkSheet<T>(int rowIndex, int columnIndex, T[][] data, uint? styleIndex = null)
+        public void WriteData<T>(int rowIndex, int columnIndex, T[][] data, uint? styleIndex = null)
         {
             if (rowIndex < 1) rowIndex = 1;
             if (columnIndex < 1) columnIndex = 1;
@@ -197,12 +200,12 @@ namespace Excel
             {
                 font = new ExcelFont();
             }
-            stylesheet.Fonts.Append(new Font(
+            stylesheet.Fonts.Append(new DocumentFormat.OpenXml.Spreadsheet.Font(
                 new FontSize() { Val = font.Size },
                 new FontName() { Val = font.FontName },
-                new Color() { Rgb = new HexBinaryValue() { Value = font.ColorHex } },
-                new FontFamily() { Val = 2 },
-                new FontScheme() { Val = FontSchemeValues.Minor },
+                new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = font.ColorHex } },
+                new DocumentFormat.OpenXml.Spreadsheet.FontFamily() { Val = 2 },
+                new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor },
                 new Bold() { Val = font.IsBold },
                 new Italic() { Val = font.IsItalic }
             ));
@@ -216,22 +219,22 @@ namespace Excel
             {
                 stylesheet.Borders.Append(new Border()
                 {
-                    LeftBorder = new LeftBorder(),
-                    RightBorder = new RightBorder(),
-                    TopBorder = new TopBorder(),
-                    BottomBorder = new BottomBorder(),
-                    DiagonalBorder = new DiagonalBorder()
+                    LeftBorder = new DocumentFormat.OpenXml.Spreadsheet.LeftBorder(),
+                    RightBorder = new DocumentFormat.OpenXml.Spreadsheet.RightBorder(),
+                    TopBorder = new DocumentFormat.OpenXml.Spreadsheet.TopBorder(),
+                    BottomBorder = new DocumentFormat.OpenXml.Spreadsheet.BottomBorder(),
+                    DiagonalBorder = new DocumentFormat.OpenXml.Spreadsheet.DiagonalBorder()
                 });
             }
             else
             {
                 stylesheet.Borders.Append(new Border()
                 {
-                    LeftBorder = new LeftBorder() { Color = new Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
-                    RightBorder = new RightBorder() { Color = new Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
-                    TopBorder = new TopBorder() { Color = new Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
-                    BottomBorder = new BottomBorder() { Color = new Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
-                    DiagonalBorder = new DiagonalBorder()
+                    LeftBorder = new DocumentFormat.OpenXml.Spreadsheet.LeftBorder() { Color = new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
+                    RightBorder = new DocumentFormat.OpenXml.Spreadsheet.RightBorder() { Color = new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
+                    TopBorder = new DocumentFormat.OpenXml.Spreadsheet.TopBorder() { Color = new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
+                    BottomBorder = new DocumentFormat.OpenXml.Spreadsheet.BottomBorder() { Color = new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = border.ColorHex } }, Style = BorderStyleValues.Thin },
+                    DiagonalBorder = new DocumentFormat.OpenXml.Spreadsheet.DiagonalBorder()
                 });
             }
             stylesheet.Borders.Count += 1;
@@ -242,15 +245,15 @@ namespace Excel
 
             if (null == fill)
             {
-                stylesheet.Fills.Append(new Fill(new PatternFill() { PatternType = PatternValues.None }));
+                stylesheet.Fills.Append(new DocumentFormat.OpenXml.Spreadsheet.Fill(new DocumentFormat.OpenXml.Spreadsheet.PatternFill() { PatternType = PatternValues.None }));
             }
             else
             {
-                stylesheet.Fills.Append(new Fill()
+                stylesheet.Fills.Append(new DocumentFormat.OpenXml.Spreadsheet.Fill()
                 {
-                    PatternFill = new PatternFill()
+                    PatternFill = new DocumentFormat.OpenXml.Spreadsheet.PatternFill()
                     {
-                        ForegroundColor = new ForegroundColor() { Rgb = new HexBinaryValue() { Value = fill.ColorHex } },
+                        ForegroundColor = new DocumentFormat.OpenXml.Spreadsheet.ForegroundColor() { Rgb = new HexBinaryValue() { Value = fill.ColorHex } },
                         PatternType = PatternValues.Solid
                     }
                 });
@@ -291,6 +294,310 @@ namespace Excel
             #endregion
 
             return (stylesheet.CellFormats.Count ?? 1) - 1;
+        }
+
+        /// <summary>
+        /// Inserts the image at the specified location 
+        /// </summary>
+        /// <param name="startRowIndex">The starting Row Index</param>
+        /// <param name="startColumnIndex">The starting column index</param>
+        /// <param name="endRowIndex">The ending row index</param>
+        /// <param name="endColumnIndex">The ending column index</param>
+        /// <param name="imageStream">Stream which contains the image data</param>
+        public void InsertImage(string imagePath, int startRowIndex, int startColumnIndex, int? endRowIndex = null, int? endColumnIndex = null)
+        {
+            WorksheetPart worksheetPart = CurrentWorksheetPart;
+            DrawingsPart drawingsPart;
+            ImagePart imagePart;
+            WorksheetDrawing worksheetDrawing;
+
+            if (worksheetPart.DrawingsPart == null)
+            {
+                drawingsPart = worksheetPart.AddNewPart<DrawingsPart>();
+                //imagePart = drawingsPart.AddImagePart(imagePartType, worksheetPart.GetIdOfPart(drawingsPart));
+                imagePart = drawingsPart.AddImagePart("image/jpeg", worksheetPart.GetIdOfPart(drawingsPart));
+                worksheetDrawing = new WorksheetDrawing();
+            }
+            else
+            {
+                drawingsPart = worksheetPart.DrawingsPart;
+                //imagePart = drawingsPart.AddImagePart(imagePartType);
+                imagePart = drawingsPart.AddImagePart("image/jpeg");
+                drawingsPart.CreateRelationshipToPart(imagePart);
+                worksheetDrawing = drawingsPart.WorksheetDrawing;
+            }
+
+            using (FileStream fs = new FileStream(imagePath, FileMode.Open))
+            {
+                imagePart.FeedData(fs);
+            }
+
+            int imageNumber = drawingsPart.ImageParts.Count<ImagePart>();
+            if (imageNumber == 1)
+            {
+                Drawing drawing = new Drawing();
+                drawing.Id = drawingsPart.GetIdOfPart(imagePart);
+                worksheetPart.Worksheet.Append(drawing);
+            }
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualDrawingProperties nvdp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualDrawingProperties()
+            {
+                Id = new UInt32Value((uint)(1024 + imageNumber)),
+                Name = "Picture " + imageNumber.ToString(),
+                Description = string.Empty
+            };
+
+            DocumentFormat.OpenXml.Drawing.PictureLocks picLocks = new DocumentFormat.OpenXml.Drawing.PictureLocks()
+            {
+                NoChangeArrowheads = true,
+                NoChangeAspect = true
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureDrawingProperties nvpdp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureDrawingProperties()
+            {
+                PictureLocks = picLocks
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureProperties nvpp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureProperties()
+            {
+                NonVisualDrawingProperties = nvdp,
+                NonVisualPictureDrawingProperties = nvpdp
+            };
+
+            DocumentFormat.OpenXml.Drawing.Blip blip = new DocumentFormat.OpenXml.Drawing.Blip()
+            {
+                Embed = drawingsPart.GetIdOfPart(imagePart),
+                CompressionState = DocumentFormat.OpenXml.Drawing.BlipCompressionValues.Print
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.BlipFill blipFill = new DocumentFormat.OpenXml.Drawing.Spreadsheet.BlipFill()
+            {
+                Blip = blip,
+                SourceRectangle = new DocumentFormat.OpenXml.Drawing.SourceRectangle()
+            };
+            DocumentFormat.OpenXml.Drawing.Stretch stretch = new DocumentFormat.OpenXml.Drawing.Stretch()
+            {
+                FillRectangle = new DocumentFormat.OpenXml.Drawing.FillRectangle()
+            };
+            blipFill.Append(stretch);
+
+            DocumentFormat.OpenXml.Drawing.Transform2D t2d = new DocumentFormat.OpenXml.Drawing.Transform2D()
+            {
+                Offset = new Offset() { X = 0, Y = 0 }
+            };
+
+            DocumentFormat.OpenXml.Drawing.Extents extents = new DocumentFormat.OpenXml.Drawing.Extents();
+            using (Bitmap bm = new Bitmap(imagePath))
+            {
+                extents.Cx = (long)bm.Width * (long)((float)914400 / bm.HorizontalResolution);
+                extents.Cy = (long)bm.Height * (long)((float)914400 / bm.VerticalResolution);
+                bm.Dispose();
+            }
+            t2d.Extents = extents;
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.ShapeProperties sp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.ShapeProperties()
+            {
+                BlackWhiteMode = DocumentFormat.OpenXml.Drawing.BlackWhiteModeValues.Auto,
+                Transform2D = t2d
+            };
+            DocumentFormat.OpenXml.Drawing.PresetGeometry prstGeom = new DocumentFormat.OpenXml.Drawing.PresetGeometry()
+            {
+                Preset = DocumentFormat.OpenXml.Drawing.ShapeTypeValues.Rectangle,
+                AdjustValueList = new DocumentFormat.OpenXml.Drawing.AdjustValueList()
+            };
+            sp.Append(prstGeom);
+            sp.Append(new DocumentFormat.OpenXml.Drawing.NoFill());
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture picture = new DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture()
+            {
+                NonVisualPictureProperties = nvpp,
+                BlipFill = blipFill,
+                ShapeProperties = sp
+            };
+
+            if (endColumnIndex.HasValue && endRowIndex.HasValue)
+            {
+                TwoCellAnchor twoCellAnchor = new TwoCellAnchor(picture, new ClientData())
+                {
+                    EditAs = EditAsValues.OneCell,
+                    FromMarker = new DocumentFormat.OpenXml.Drawing.Spreadsheet.FromMarker()
+                    {
+                        ColumnId = new ColumnId() { Text = startColumnIndex.ToString() },
+                        ColumnOffset = new ColumnOffset() { Text = "14250" },
+                        RowId = new RowId() { Text = startRowIndex.ToString() },
+                        RowOffset = new RowOffset() { Text = "14250" }
+                    },
+                    ToMarker = new DocumentFormat.OpenXml.Drawing.Spreadsheet.ToMarker()
+                    {
+                        ColumnId = new ColumnId() { Text = endColumnIndex.Value.ToString() },
+                        ColumnOffset = new ColumnOffset() { Text = "14250" },
+                        RowId = new RowId() { Text = endRowIndex.Value.ToString() },
+                        RowOffset = new RowOffset() { Text = "14250" }
+                    }
+                };
+                worksheetDrawing.Append(twoCellAnchor);
+            }
+            else
+            {
+                OneCellAnchor oneCellAnchor = new OneCellAnchor(picture, new ClientData())
+                {
+                    Extent = new Extent()
+                    {
+                        Cx = extents.Cx,
+                        Cy = extents.Cy
+                    },
+                    FromMarker = new DocumentFormat.OpenXml.Drawing.Spreadsheet.FromMarker()
+                    {
+                        ColumnId = new ColumnId() { Text = startColumnIndex.ToString() },
+                        ColumnOffset = new ColumnOffset() { Text = "14250" },
+                        RowId = new RowId() { Text = startRowIndex.ToString() },
+                        RowOffset = new RowOffset() { Text = "14250" }
+                    }
+                };
+                worksheetDrawing.Append(oneCellAnchor);
+            }
+
+            worksheetDrawing.Save(drawingsPart);
+        }
+
+        public void InsertImage(long x, long y, long? width, long? height, string imagePath)
+        {
+            WorksheetPart worksheetPart = CurrentWorksheetPart;
+            DrawingsPart drawingsPart;
+            ImagePart imagePart;
+            WorksheetDrawing worksheetDrawing;
+
+            if (worksheetPart.DrawingsPart == null)
+            {
+                drawingsPart = worksheetPart.AddNewPart<DrawingsPart>();
+                //imagePart = drawingsPart.AddImagePart(imagePartType, worksheetPart.GetIdOfPart(drawingsPart));
+                imagePart = drawingsPart.AddImagePart("image/jpeg", worksheetPart.GetIdOfPart(drawingsPart));
+                worksheetDrawing = new WorksheetDrawing();
+            }
+            else
+            {
+                drawingsPart = worksheetPart.DrawingsPart;
+                //imagePart = drawingsPart.AddImagePart(imagePartType);
+                imagePart = drawingsPart.AddImagePart("image/jpeg");
+                drawingsPart.CreateRelationshipToPart(imagePart);
+                worksheetDrawing = drawingsPart.WorksheetDrawing;
+            }
+
+            using (FileStream fs = new FileStream(imagePath, FileMode.Open))
+            {
+                imagePart.FeedData(fs);
+            }
+
+            int imageNumber = drawingsPart.ImageParts.Count<ImagePart>();
+            if (imageNumber == 1)
+            {
+                Drawing drawing = new Drawing();
+                drawing.Id = drawingsPart.GetIdOfPart(imagePart);
+                worksheetPart.Worksheet.Append(drawing);
+            }
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualDrawingProperties nvdp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualDrawingProperties()
+            {
+                Id = new UInt32Value((uint)(1024 + imageNumber)),
+                Name = "Picture " + imageNumber.ToString(),
+                Description = string.Empty
+            };
+
+            DocumentFormat.OpenXml.Drawing.PictureLocks picLocks = new DocumentFormat.OpenXml.Drawing.PictureLocks()
+            {
+                NoChangeArrowheads = true,
+                NoChangeAspect = true
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureDrawingProperties nvpdp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureDrawingProperties()
+            {
+                PictureLocks = picLocks
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureProperties nvpp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.NonVisualPictureProperties()
+            {
+                NonVisualDrawingProperties = nvdp,
+                NonVisualPictureDrawingProperties = nvpdp
+            };
+
+            DocumentFormat.OpenXml.Drawing.Blip blip = new DocumentFormat.OpenXml.Drawing.Blip()
+            {
+                Embed = drawingsPart.GetIdOfPart(imagePart),
+                CompressionState = DocumentFormat.OpenXml.Drawing.BlipCompressionValues.Print
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.BlipFill blipFill = new DocumentFormat.OpenXml.Drawing.Spreadsheet.BlipFill()
+            {
+                Blip = blip,
+                SourceRectangle = new DocumentFormat.OpenXml.Drawing.SourceRectangle()
+            };
+            DocumentFormat.OpenXml.Drawing.Stretch stretch = new DocumentFormat.OpenXml.Drawing.Stretch()
+            {
+                FillRectangle = new DocumentFormat.OpenXml.Drawing.FillRectangle()
+            };
+            blipFill.Append(stretch);
+
+            DocumentFormat.OpenXml.Drawing.Transform2D t2d = new DocumentFormat.OpenXml.Drawing.Transform2D()
+            {
+                Offset = new Offset() { X = 0, Y = 0 }
+            };
+
+            DocumentFormat.OpenXml.Drawing.Extents extents = new DocumentFormat.OpenXml.Drawing.Extents();
+            using (Bitmap bm = new Bitmap(imagePath))
+            {
+                if (width == null)
+                    extents.Cx = (long)bm.Width * (long)((float)914400 / bm.HorizontalResolution);
+                else
+                    extents.Cx = width * (long)((float)914400 / bm.HorizontalResolution);
+
+                if (height == null)
+                    extents.Cy = (long)bm.Height * (long)((float)914400 / bm.VerticalResolution);
+                else
+                    extents.Cy = height * (long)((float)914400 / bm.VerticalResolution);
+
+                bm.Dispose();
+            }
+            t2d.Extents = extents;
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.ShapeProperties sp = new DocumentFormat.OpenXml.Drawing.Spreadsheet.ShapeProperties()
+            {
+                BlackWhiteMode = DocumentFormat.OpenXml.Drawing.BlackWhiteModeValues.Auto,
+                Transform2D = t2d
+            };
+            DocumentFormat.OpenXml.Drawing.PresetGeometry prstGeom = new DocumentFormat.OpenXml.Drawing.PresetGeometry()
+            {
+                Preset = DocumentFormat.OpenXml.Drawing.ShapeTypeValues.Rectangle,
+                AdjustValueList = new DocumentFormat.OpenXml.Drawing.AdjustValueList()
+            };
+            sp.Append(prstGeom);
+            sp.Append(new DocumentFormat.OpenXml.Drawing.NoFill());
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture picture = new DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture()
+            {
+                NonVisualPictureProperties = nvpp,
+                BlipFill = blipFill,
+                ShapeProperties = sp
+            };
+
+            DocumentFormat.OpenXml.Drawing.Spreadsheet.Position pos = new DocumentFormat.OpenXml.Drawing.Spreadsheet.Position()
+            {
+                X = x * 914400 / 72,
+                Y = y * 914400 / 72
+            };
+
+            AbsoluteAnchor anchor = new AbsoluteAnchor(picture, new ClientData())
+            {
+                Position = pos,
+                Extent = new Extent() { Cx = extents.Cx, Cy = extents.Cy }
+            };
+
+            worksheetDrawing.Append(anchor);
+            worksheetDrawing.Save(drawingsPart);
+        }
+
+        public void InsertImage(long x, long y, string imagePath)
+        {
+            InsertImage(x, y, null, null, imagePath);
         }
 
         #endregion

@@ -35,13 +35,23 @@ namespace Web
                                   new Excel.OpenXMLExcel.ExcelAlign() { Horizontal = Excel.OpenXMLExcel.ExcelAlign.ExcelAlignHorizontalValue.Center }
                             );
 
-                            exc.WriteDataIntoWorkSheet(1, 1, "Hello world", styleIndex);
-                            exc.WriteDataIntoWorkSheet(2, 1, new string[][] { new string[] { "Hello world" } });
-                            exc.WriteDataIntoWorkSheet(2, 1, 1000);
-                            exc.WriteDataIntoWorkSheet(2, 2, arrDouble);
+                            exc.InsertImage(@"F:\example\img.jpg", 0, 0, 10, 10);
+                            exc.InsertImage(@"F:\example\img.png", 10, 10, 20, 20);
+                            //exc.InsertImage(0, 70, @"F:\example\img.jpg");
+                            //exc.InsertImage(0, 1000, @"F:\example\img.png");
                             exc.RenameCurrentWorksheet("Hello");
+
+                            exc.AddNewWorksheet();
+                            exc.WriteData(1, 1, "Hello world", styleIndex);
+                            exc.WriteData(2, 1, new string[][] { new string[] { "Hello world" } });
+                            exc.WriteData(2, 1, 1000);
+                            exc.WriteData(2, 2, arrDouble);
+                            exc.InsertImage(@"F:\example\img.jpg", 10, 0);
+
                             exc.AddNewWorksheet("Hello world");
-                            exc.WriteDataIntoWorkSheet(3, 3, arrString, styleIndex);
+                            //exc.InsertImage(10, 10, 20, 20, @"F:\example\img.jpg");
+                            exc.InsertImage(@"F:\example\img.png", 10, 0);
+                            exc.WriteData(3, 3, arrString, styleIndex);
                         }
                     }
                     WriteMessage("Success");
