@@ -65,9 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Excel\OpenXML.csproj">
+    <ProjectReference Include="..\OpenXMLHelper\OpenXMLHelper.csproj">
       <Project>{E5D74323-E4ED-4FDE-B8E9-258120C01457}</Project>
-      <Name>OpenXML</Name>
+      <Name>OpenXMLHelper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

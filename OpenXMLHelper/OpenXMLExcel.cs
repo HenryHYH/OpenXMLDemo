@@ -12,7 +12,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using System.Drawing;
 
-namespace Excel
+namespace OpenXMLHelper
 {
     public class OpenXMLExcel : IDisposable
     {

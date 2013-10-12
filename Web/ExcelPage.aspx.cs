@@ -17,7 +17,7 @@ namespace Web
                 {
                     using (System.IO.FileStream fs = new System.IO.FileStream(string.Format(@"{0}\a.xlsx", @"f:\example"), System.IO.FileMode.Create))
                     {
-                        using (Excel.OpenXMLExcel exc = new Excel.OpenXMLExcel(fs))
+                        using (OpenXMLHelper.OpenXMLExcel exc = new OpenXMLHelper.OpenXMLExcel(fs))
                         {
                             string[][] arrString = new string[][] { 
                                 new string[] { "Hello world", "2", "3", "4", "5" }, 
@@ -29,10 +29,10 @@ namespace Web
                             double?[][] arrDouble = new double?[][] { new double?[] { 1, 2, 3, 4, 5 }, new double?[] { null, 1, 2, 3.1 } };
 
                             uint styleIndex = exc.AddStyleSheet(
-                                  new Excel.OpenXMLExcel.ExcelFont() { ColorHex = "FF00FF", IsBold = true, IsItalic = true },
-                                  new Excel.OpenXMLExcel.ExcelBorder() { ColorHex = "000" },
-                                  new Excel.OpenXMLExcel.ExcelFill() { ColorHex = "0FF" },
-                                  new Excel.OpenXMLExcel.ExcelAlign() { Horizontal = Excel.OpenXMLExcel.ExcelAlign.ExcelAlignHorizontalValue.Center }
+                                  new OpenXMLHelper.OpenXMLExcel.ExcelFont() { ColorHex = "FF00FF", IsBold = true, IsItalic = true },
+                                  new OpenXMLHelper.OpenXMLExcel.ExcelBorder() { ColorHex = "000" },
+                                  new OpenXMLHelper.OpenXMLExcel.ExcelFill() { ColorHex = "0FF" },
+                                  new OpenXMLHelper.OpenXMLExcel.ExcelAlign() { Horizontal = OpenXMLHelper.OpenXMLExcel.ExcelAlign.ExcelAlignHorizontalValue.Center }
                             );
 
                             exc.InsertImage(@"F:\example\img.jpg", 0, 0, 10, 10);
