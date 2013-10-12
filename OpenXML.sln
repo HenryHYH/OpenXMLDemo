@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excel", "Excel\Excel.csproj", "{E5D74323-E4ED-4FDE-B8E9-258120C01457}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenXML", "Excel\OpenXML.csproj", "{E5D74323-E4ED-4FDE-B8E9-258120C01457}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{8CAB5C25-4F2D-422E-B3C6-E3A9AAF35E7F}"
 EndProject

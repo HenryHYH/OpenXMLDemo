@@ -28,16 +28,20 @@ namespace Web
 
                             double?[][] arrDouble = new double?[][] { new double?[] { 1, 2, 3, 4, 5 }, new double?[] { null, 1, 2, 3.1 } };
 
-                            exc.WriteDataIntoWorkSheet(1, 1, "Hello world");
+                            uint styleIndex = exc.AddStyleSheet(
+                                  new Excel.OpenXMLExcel.ExcelFont() { ColorHex = "FF00FF", IsBold = true, IsItalic = true },
+                                  new Excel.OpenXMLExcel.ExcelBorder() { ColorHex = "000" },
+                                  new Excel.OpenXMLExcel.ExcelFill() { ColorHex = "0FF" },
+                                  new Excel.OpenXMLExcel.ExcelAlign() { Horizontal = Excel.OpenXMLExcel.ExcelAlign.ExcelAlignHorizontalValue.Center }
+                            );
+
+                            exc.WriteDataIntoWorkSheet(1, 1, "Hello world", styleIndex);
+                            exc.WriteDataIntoWorkSheet(2, 1, new string[][] { new string[] { "Hello world" } });
                             exc.WriteDataIntoWorkSheet(2, 1, 1000);
-
                             exc.WriteDataIntoWorkSheet(2, 2, arrDouble);
-
                             exc.RenameCurrentWorksheet("Hello");
-
                             exc.AddNewWorksheet("Hello world");
-
-                            exc.WriteDataIntoWorkSheet(3, 3, arrString);
+                            exc.WriteDataIntoWorkSheet(3, 3, arrString, styleIndex);
                         }
                     }
                     WriteMessage("Success");
