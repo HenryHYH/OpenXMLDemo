@@ -23,7 +23,7 @@ namespace Web
                                 new string[] { "Hello world", "2", "3", "4", "5" }, 
                                 new string[] { "", "1", "2", "3", "4" }, 
                                 new string[] { "1", "2", "3" }, 
-                                new string[] { "Hello world" }
+                                new string[] { null, "Hello world" }
                             };
 
                             double?[][] arrDouble = new double?[][] { new double?[] { 1, 2, 3, 4, 5 }, new double?[] { null, 1, 2, 3.1 } };
@@ -52,6 +52,12 @@ namespace Web
                             //exc.InsertImage(10, 10, 20, 20, @"F:\example\img.jpg");
                             exc.InsertImage(@"F:\example\img.png", 10, 0);
                             exc.WriteData(3, 3, arrString, styleIndex);
+
+                            exc.AddNewWorksheet("Output");
+                            exc.WriteData(1, 1, new string[] { "Name", "Age" }, exc.TableHeaderCellStyleSheet);
+                            exc.WriteData(2, 1, new string[][] { new[] { "Henry", "1" }, new[] { "Hello world", "2" } }, exc.TableBodyCellStyleSheet);
+
+                            exc.WriteTable(5, 1, new[] { "Name", "Age" }, new string[][] { new[] { "Henry", "1" }, new[] { "Hello world", "2" } });
                         }
                     }
                     WriteMessage("Success");

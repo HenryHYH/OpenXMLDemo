@@ -80,16 +80,16 @@ namespace OpenXMLHelper
 
             stylesheet.CellFormats = new CellFormats() { Count = 1 };
             stylesheet.CellFormats.Append(new CellFormat() { FontId = 0, ApplyFont = true, FillId = 0, ApplyFill = true, BorderId = 0, ApplyBorder = true });
+
+            TableHeaderCellStyleSheet = AddTableHeaderStyleSheet();
+            TableBodyCellStyleSheet = AddTableBodyStyleSheet();
         }
 
         #endregion
 
         #region Public interface
 
-        public void WriteData<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null)
-        {
-            WriteData(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex);
-        }
+        #region Text & Table
 
         public void WriteData(int rowIndex, int columnIndex, DataTable dt, uint? styleIndex = null)
         {
@@ -117,6 +117,16 @@ namespace OpenXMLHelper
             }
         }
 
+        public void WriteData<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null)
+        {
+            WriteData(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex);
+        }
+
+        public void WriteData<T>(int rowIndex, int columnIndex, T[] data, uint? styleIndex = null)
+        {
+            WriteData(rowIndex, columnIndex, new T[][] { data }, styleIndex);
+        }
+
         public void WriteData<T>(int rowIndex, int columnIndex, T[][] data, uint? styleIndex = null)
         {
             if (rowIndex < 1) rowIndex = 1;
@@ -125,6 +135,8 @@ namespace OpenXMLHelper
             WorksheetPart worksheetPart = CurrentWorksheetPart;
             columnIndex -= 1;
             int i = 0;
+            double tmpNumber;
+            string tmpString;
             foreach (T[] row in data)
             {
                 int j = 0;
@@ -134,14 +146,16 @@ namespace OpenXMLHelper
                     Cell cell = InsertCellInWorksheet(name, Convert.ToUInt32(i + rowIndex), worksheetPart);
                     cell.StyleIndex = styleIndex;
 
-                    if (numberTypes.Contains(typeof(T)))
+                    tmpString = null == text ? string.Empty : text.ToString();
+
+                    if (numberTypes.Contains(typeof(T)) || double.TryParse(tmpString, out tmpNumber))
                     {
-                        cell.CellValue = new CellValue(text.ToString());
+                        cell.CellValue = new CellValue(tmpString);
                         cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                     }
                     else
                     {
-                        int index = InsertSharedStringItem(text.ToString(), shareStringPart);
+                        int index = InsertSharedStringItem(tmpString, shareStringPart);
                         cell.CellValue = new CellValue(index.ToString());
                         cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
                     }
@@ -152,6 +166,16 @@ namespace OpenXMLHelper
                 i++;
             }
         }
+
+        public void WriteTable<T>(int rowIndex, int columnIndex, string[] header, T[][] data, uint? headerStyleIndex = null, uint? bodyStyleIndex = null)
+        {
+            WriteData(rowIndex, columnIndex, header, headerStyleIndex ?? TableHeaderCellStyleSheet);
+            WriteData(rowIndex + 1, columnIndex, data, bodyStyleIndex ?? TableBodyCellStyleSheet);
+        }
+
+        #endregion
+
+        #region Worksheet
 
         public void RenameCurrentWorksheet(string sheetName)
         {
@@ -190,6 +214,10 @@ namespace OpenXMLHelper
             sheets.Append(sheet);
             workbookPart.Workbook.Save();
         }
+
+        #endregion
+
+        #region Style
 
         public uint AddStyleSheet(ExcelFont font = null, ExcelBorder border = null, ExcelFill fill = null, ExcelAlign align = null)
         {
@@ -296,14 +324,32 @@ namespace OpenXMLHelper
             return (stylesheet.CellFormats.Count ?? 1) - 1;
         }
 
+        public uint TableHeaderCellStyleSheet { get; private set; }
+
+        public uint AddTableHeaderStyleSheet()
+        {
+            return AddStyleSheet(new ExcelFont() { IsBold = true }, new ExcelBorder() { ColorHex = "000000" }, null, new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Left });
+        }
+
+        public uint TableBodyCellStyleSheet { get; private set; }
+
+        public uint AddTableBodyStyleSheet()
+        {
+            return AddStyleSheet(null, new ExcelBorder() { ColorHex = "000000" }, null, null);
+        }
+
+        #endregion
+
+        #region Image
+
         /// <summary>
         /// Inserts the image at the specified location 
         /// </summary>
+        /// <param name="imagePath">Image path</param>
         /// <param name="startRowIndex">The starting Row Index</param>
         /// <param name="startColumnIndex">The starting column index</param>
         /// <param name="endRowIndex">The ending row index</param>
         /// <param name="endColumnIndex">The ending column index</param>
-        /// <param name="imageStream">Stream which contains the image data</param>
         public void InsertImage(string imagePath, int startRowIndex, int startColumnIndex, int? endRowIndex = null, int? endColumnIndex = null)
         {
             WorksheetPart worksheetPart = CurrentWorksheetPart;
@@ -602,6 +648,8 @@ namespace OpenXMLHelper
 
         #endregion
 
+        #endregion
+
         #region private static OpenXml methods
 
         private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
@@ -796,6 +844,8 @@ namespace OpenXMLHelper
 
         #region Class
 
+        #region Style
+
         public class ExcelFont
         {
             public ExcelFont()
@@ -876,6 +926,8 @@ namespace OpenXMLHelper
 
             public ExcelAlignVerticalValue Vertical { get; set; }
         }
+
+        #endregion
 
         #endregion
     }
