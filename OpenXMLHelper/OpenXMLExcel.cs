@@ -67,8 +67,8 @@ namespace OpenXMLHelper
 
         private void InitStyleSheet()
         {
-            stylesheet.Fonts = new DocumentFormat.OpenXml.Spreadsheet.Fonts() { Count = 1 };
-            stylesheet.Fonts.Append(new DocumentFormat.OpenXml.Spreadsheet.Font(new FontSize() { Val = 11D }, new FontName() { Val = "Arial" }, new DocumentFormat.OpenXml.Spreadsheet.FontFamily() { Val = 2 }, new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor }, new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }));
+            stylesheet.Fonts = new DocumentFormat.OpenXml.Spreadsheet.Fonts() { Count = 1, KnownFonts = true };
+            stylesheet.Fonts.Append(new DocumentFormat.OpenXml.Spreadsheet.Font(new FontSize() { Val = 11D }, new FontName() { Val = "Arial" }, new DocumentFormat.OpenXml.Spreadsheet.FontFamily() { Val = 2 }, new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor }, new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }, new FontCharSet() { Val = 134 }));
 
             // 程序会自动占用 FillId = 0 和 FillId = 1 的 Fill，0 为 无背景，1 为灰色花纹，自定义只能从 2 开始
             stylesheet.Fills = new Fills() { Count = 2 };
@@ -133,7 +133,6 @@ namespace OpenXMLHelper
 
             WorksheetPart worksheetPart = CurrentWorksheetPart;
             int i = 0;
-            double tmpNumber;
             string tmpString;
             foreach (T[] row in data)
             {
@@ -146,7 +145,7 @@ namespace OpenXMLHelper
 
                     tmpString = null == text ? string.Empty : text.ToString();
 
-                    if (numberTypes.Contains(typeof(T)) || double.TryParse(tmpString, out tmpNumber))
+                    if (numberTypes.Contains(typeof(T)))
                     {
                         cell.CellValue = new CellValue(tmpString);
                         cell.DataType = new EnumValue<CellValues>(CellValues.Number);
@@ -230,11 +229,13 @@ namespace OpenXMLHelper
                 new FontSize() { Val = font.Size },
                 new FontName() { Val = font.FontName },
                 new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = font.ColorHex } },
-                new DocumentFormat.OpenXml.Spreadsheet.FontFamily() { Val = 2 },
-                new DocumentFormat.OpenXml.Spreadsheet.FontScheme() { Val = FontSchemeValues.Minor },
                 new Bold() { Val = font.IsBold },
-                new Italic() { Val = font.IsItalic }
-            ));
+                new Italic() { Val = font.IsItalic },
+                new FontCharSet() { Val = 134 }
+            )
+            {
+
+            });
             stylesheet.Fonts.Count += 1;
 
             #endregion
