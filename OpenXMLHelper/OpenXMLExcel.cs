@@ -97,7 +97,6 @@ namespace OpenXMLHelper
             if (columnIndex < 1) columnIndex = 1;
 
             WorksheetPart worksheetPart = CurrentWorksheetPart;
-            columnIndex -= 1;
             int j = 0;
             foreach (DataRow dr in dt.Rows)
             {
@@ -133,7 +132,6 @@ namespace OpenXMLHelper
             if (columnIndex < 1) columnIndex = 1;
 
             WorksheetPart worksheetPart = CurrentWorksheetPart;
-            columnIndex -= 1;
             int i = 0;
             double tmpNumber;
             string tmpString;
@@ -648,6 +646,91 @@ namespace OpenXMLHelper
 
         #endregion
 
+        #region Merge cell
+
+        /// <summary>
+        /// Given a document name, a worksheet name, and the names of two adjacent cells, merges the two cells.
+        /// When two cells are merged, only the content from one cell is preserved:
+        /// the upper-left cell for left-to-right languages or the upper-right cell for right-to-left languages.
+        /// </summary>
+        /// <param name="docName"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="cell1Name"></param>
+        /// <param name="cell2Name"></param>
+        public void MergeTwoCells(string cell1Name, string cell2Name)
+        {
+            Worksheet worksheet = CurrentWorksheetPart.Worksheet;
+            if (worksheet == null || string.IsNullOrEmpty(cell1Name) || string.IsNullOrEmpty(cell2Name))
+            {
+                return;
+            }
+
+            // Verify if the specified cells exist, and if they do not exist, create them.
+            CreateSpreadsheetCellIfNotExist(worksheet, cell1Name);
+            CreateSpreadsheetCellIfNotExist(worksheet, cell2Name);
+
+            MergeCells mergeCells;
+            if (worksheet.Elements<MergeCells>().Count() > 0)
+            {
+                mergeCells = worksheet.Elements<MergeCells>().First();
+            }
+            else
+            {
+                mergeCells = new MergeCells();
+
+                // Insert a MergeCells object into the specified position.
+                if (worksheet.Elements<CustomSheetView>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<CustomSheetView>().First());
+                }
+                else if (worksheet.Elements<DataConsolidate>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<DataConsolidate>().First());
+                }
+                else if (worksheet.Elements<SortState>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SortState>().First());
+                }
+                else if (worksheet.Elements<AutoFilter>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<AutoFilter>().First());
+                }
+                else if (worksheet.Elements<Scenarios>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<Scenarios>().First());
+                }
+                else if (worksheet.Elements<ProtectedRanges>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<ProtectedRanges>().First());
+                }
+                else if (worksheet.Elements<SheetProtection>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetProtection>().First());
+                }
+                else if (worksheet.Elements<SheetCalculationProperties>().Count() > 0)
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetCalculationProperties>().First());
+                }
+                else
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetData>().First());
+                }
+            }
+
+            // Create the merged cell and append it to the MergeCells collection.
+            MergeCell mergeCell = new MergeCell() { Reference = new StringValue(cell1Name + ":" + cell2Name) };
+            mergeCells.Append(mergeCell);
+
+            worksheet.Save();
+        }
+
+        public void MergeTwoCells(int startRowIndex, int startColumnIndex, int endRowIndex, int endColumnIndex)
+        {
+            MergeTwoCells(GetColumnName(startColumnIndex) + startRowIndex, GetColumnName(endColumnIndex) + endRowIndex);
+        }
+
+        #endregion
+
         #endregion
 
         #region private static OpenXml methods
@@ -753,6 +836,22 @@ namespace OpenXMLHelper
         }
 
         /// <summary>
+        /// Given a SpreadsheetDocument and a worksheet name, get the specified worksheet.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="worksheetName"></param>
+        /// <returns></returns>
+        private static Worksheet GetWorksheet(SpreadsheetDocument document, string worksheetName)
+        {
+            IEnumerable<Sheet> sheets = document.WorkbookPart.Workbook.Descendants<Sheet>().Where(s => s.Name == worksheetName);
+            WorksheetPart worksheetPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheets.First().Id);
+            if (sheets.Count() == 0)
+                return null;
+            else
+                return worksheetPart.Worksheet;
+        }
+
+        /// <summary>
         /// Given a Worksheet and a cell name, verifies that the specified cell exists.
         /// If it does not exist, creates a new cell. 
         /// </summary>
@@ -806,6 +905,19 @@ namespace OpenXMLHelper
             return match.Value;
         }
 
+        private static string GetColumnName(int index)
+        {
+            string s = string.Empty;
+            while (index > 0)
+            {
+                int m = index % 26;
+                if (m == 0) m = 26;
+                s = (char)(m + 64) + s;
+                index = (index - m) / 26;
+            }
+            return s;
+        }
+
         /// <summary>
         /// Given a cell name, parses the specified cell to get the row index.
         /// </summary>
@@ -818,26 +930,6 @@ namespace OpenXMLHelper
             Match match = regex.Match(cellName);
 
             return uint.Parse(match.Value);
-        }
-
-        #endregion
-
-        #region Utility methods
-
-        private static string GetColumnName(int index)
-        {
-            string name = "";
-            char[] columnNames = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-            int num = index;
-            do
-            {
-                int i = num % 26;
-                name = columnNames[i] + name;
-                num = num / 26 - 1;
-            } while (num > -1);
-            if (string.IsNullOrEmpty(name))
-                name = "A";
-            return name;
         }
 
         #endregion
@@ -897,8 +989,8 @@ namespace OpenXMLHelper
         {
             public ExcelAlign()
             {
-                Horizontal = ExcelAlignHorizontalValue.Justify;
-                Vertical = ExcelAlignVerticalValue.Justify;
+                Horizontal = ExcelAlignHorizontalValue.General;
+                Vertical = ExcelAlignVerticalValue.Center;
             }
 
             public enum ExcelAlignHorizontalValue

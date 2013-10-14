@@ -35,10 +35,17 @@ namespace Web
                                   new OpenXMLHelper.OpenXMLExcel.ExcelAlign() { Horizontal = OpenXMLHelper.OpenXMLExcel.ExcelAlign.ExcelAlignHorizontalValue.Center }
                             );
 
+                            exc.WriteData(1, 1, new[] { "Hello world. This is very very long.", "Henry" });
+                            //exc.WriteData(1, 1, "Hello world");
+                            exc.MergeTwoCells("A1", "B1");
+
+                            exc.WriteData(3, 3, new[] { "Merge A", "Merge B" });
+                            exc.MergeTwoCells(3, 3, 3, 4);
+
+                            exc.AddNewWorksheet();
+                            exc.AddNewWorksheet();
                             exc.InsertImage(@"F:\example\img.jpg", 0, 0, 10, 10);
                             exc.InsertImage(@"F:\example\img.png", 10, 10, 20, 20);
-                            //exc.InsertImage(0, 70, @"F:\example\img.jpg");
-                            //exc.InsertImage(0, 1000, @"F:\example\img.png");
                             exc.RenameCurrentWorksheet("Hello");
 
                             exc.AddNewWorksheet();
@@ -49,7 +56,6 @@ namespace Web
                             exc.InsertImage(@"F:\example\img.jpg", 10, 0);
 
                             exc.AddNewWorksheet("Hello world");
-                            //exc.InsertImage(10, 10, 20, 20, @"F:\example\img.jpg");
                             exc.InsertImage(@"F:\example\img.png", 10, 0);
                             exc.WriteData(3, 3, arrString, styleIndex);
 
