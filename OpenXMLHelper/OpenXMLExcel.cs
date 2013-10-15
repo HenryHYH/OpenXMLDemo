@@ -78,11 +78,26 @@ namespace OpenXMLHelper
             stylesheet.Borders = new Borders() { Count = 1 };
             stylesheet.Borders.Append(new Border(new DocumentFormat.OpenXml.Spreadsheet.LeftBorder(), new DocumentFormat.OpenXml.Spreadsheet.RightBorder(), new DocumentFormat.OpenXml.Spreadsheet.TopBorder() { }, new DocumentFormat.OpenXml.Spreadsheet.BottomBorder(), new DiagonalBorder()));
 
-            stylesheet.CellFormats = new CellFormats() { Count = 1 };
-            stylesheet.CellFormats.Append(new CellFormat() { FontId = 0, ApplyFont = true, FillId = 0, ApplyFill = true, BorderId = 0, ApplyBorder = true });
+            stylesheet.NumberingFormats = new NumberingFormats() { Count = 1 };
+            stylesheet.NumberingFormats.Append(new NumberingFormat() { NumberFormatId = 1, FormatCode = "#,##0_ " });
 
-            TableHeaderCellStyleSheet = AddTableHeaderStyleSheet();
-            TableBodyCellStyleSheet = AddTableBodyStyleSheet();
+            stylesheet.CellFormats = new CellFormats() { Count = 1 };
+            stylesheet.CellFormats.Append(new CellFormat()
+            {
+                FontId = 0,
+                ApplyFont = true,
+                FillId = 0,
+                ApplyFill = true,
+                BorderId = 0,
+                ApplyBorder = true,
+                NumberFormatId = 0,
+                ApplyNumberFormat = true
+            });
+
+            TableHeaderCellStyleIndex = AddTableHeaderStyleIndex();
+            TableBodyCellStyleIndex = AddTableBodyStyleIndex();
+            StringCellStyleIndex = AddStringCellStyleIndex();
+            NumberCellStyleIndex = AddNumberCellStyleIndex();
         }
 
         #endregion
@@ -166,8 +181,8 @@ namespace OpenXMLHelper
 
         public void WriteTable<T>(int rowIndex, int columnIndex, string[] header, T[][] data, uint? headerStyleIndex = null, uint? bodyStyleIndex = null)
         {
-            WriteData(rowIndex, columnIndex, header, headerStyleIndex ?? TableHeaderCellStyleSheet);
-            WriteData(rowIndex + 1, columnIndex, data, bodyStyleIndex ?? TableBodyCellStyleSheet);
+            WriteData(rowIndex, columnIndex, header, headerStyleIndex ?? TableHeaderCellStyleIndex);
+            WriteData(rowIndex + 1, columnIndex, data, bodyStyleIndex ?? TableBodyCellStyleIndex);
         }
 
         #endregion
@@ -216,7 +231,7 @@ namespace OpenXMLHelper
 
         #region Style
 
-        public uint AddStyleSheet(ExcelFont font = null, ExcelBorder border = null, ExcelFill fill = null, ExcelAlign align = null)
+        public uint AddStyleSheet(ExcelFont font = null, ExcelBorder border = null, ExcelFill fill = null, ExcelAlign align = null, ExcelNumberingFormat numberingFormat = null)
         {
 
             #region Font
@@ -232,10 +247,7 @@ namespace OpenXMLHelper
                 new Bold() { Val = font.IsBold },
                 new Italic() { Val = font.IsItalic },
                 new FontCharSet() { Val = 134 }
-            )
-            {
-
-            });
+            ));
             stylesheet.Fonts.Count += 1;
 
             #endregion
@@ -299,6 +311,15 @@ namespace OpenXMLHelper
 
             #endregion
 
+            #region Number format
+
+            if (null == numberingFormat)
+            {
+                numberingFormat = new ExcelNumberingFormat();
+            }
+
+            #endregion
+
             #region CellFormat
 
             CellFormat cf = new CellFormat();
@@ -315,6 +336,9 @@ namespace OpenXMLHelper
             cf.FillId = (stylesheet.Fills.Count ?? 1) - 1;
             cf.ApplyFill = true;
 
+            cf.NumberFormatId = numberingFormat.NumberingFormatId;
+            cf.ApplyNumberFormat = true;
+
             stylesheet.CellFormats.Append(cf);
             stylesheet.CellFormats.Count += 1;
 
@@ -323,18 +347,32 @@ namespace OpenXMLHelper
             return (stylesheet.CellFormats.Count ?? 1) - 1;
         }
 
-        public uint TableHeaderCellStyleSheet { get; private set; }
+        public uint TableHeaderCellStyleIndex { get; private set; }
 
-        public uint AddTableHeaderStyleSheet()
+        private uint AddTableHeaderStyleIndex()
         {
             return AddStyleSheet(new ExcelFont() { IsBold = true }, new ExcelBorder() { ColorHex = "000000" }, null, new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Left });
         }
 
-        public uint TableBodyCellStyleSheet { get; private set; }
+        public uint TableBodyCellStyleIndex { get; private set; }
 
-        public uint AddTableBodyStyleSheet()
+        private uint AddTableBodyStyleIndex()
         {
-            return AddStyleSheet(null, new ExcelBorder() { ColorHex = "000000" }, null, null);
+            return AddStyleSheet(border: new ExcelBorder() { ColorHex = "000000" });
+        }
+
+        public uint StringCellStyleIndex { get; private set; }
+
+        private uint AddStringCellStyleIndex()
+        {
+            return AddStyleSheet(align: new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Left });
+        }
+
+        public uint NumberCellStyleIndex { get; private set; }
+
+        private uint AddNumberCellStyleIndex()
+        {
+            return AddStyleSheet(numberingFormat: new ExcelNumberingFormat() { NumberingFormatCategory = ExcelNumberingFormat.ExcelNumberingFormatCategory.Number }, align: new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Center });
         }
 
         #endregion
@@ -1018,6 +1056,23 @@ namespace OpenXMLHelper
             public ExcelAlignHorizontalValue Horizontal { get; set; }
 
             public ExcelAlignVerticalValue Vertical { get; set; }
+        }
+
+        public class ExcelNumberingFormat
+        {
+            public ExcelNumberingFormat()
+            {
+                NumberingFormatId = 0;
+            }
+
+            public uint NumberingFormatId { get; private set; }
+
+            public ExcelNumberingFormatCategory NumberingFormatCategory { set { NumberingFormatId = (uint)value; } }
+
+            public enum ExcelNumberingFormatCategory
+            {
+                Number = 1
+            }
         }
 
         #endregion

@@ -43,6 +43,9 @@ namespace Web
                             exc.MergeTwoCells(3, 3, 3, 4);
 
                             exc.AddNewWorksheet();
+
+                            exc.WriteData(1, 1, 1000, exc.NumberCellStyleIndex);
+
                             exc.AddNewWorksheet();
                             exc.InsertImage(@"F:\example\img.jpg", 0, 0, 10, 10);
                             exc.InsertImage(@"F:\example\img.png", 10, 10, 20, 20);
@@ -50,7 +53,7 @@ namespace Web
 
                             exc.AddNewWorksheet();
                             exc.WriteData(1, 1, "Hello world", styleIndex);
-                            exc.WriteData(2, 1, new string[][] { new string[] { "Hello world" } });
+                            exc.WriteData(2, 1, new string[][] { new string[] { "Hello world" } }, exc.StringCellStyleIndex);
                             exc.WriteData(2, 1, 1000);
                             exc.WriteData(2, 2, arrDouble);
                             exc.InsertImage(@"F:\example\img.jpg", 10, 0);
@@ -67,8 +70,8 @@ namespace Web
                             exc.WriteData(3, 3, arrString, styleIndex2);
 
                             exc.AddNewWorksheet("Output");
-                            exc.WriteData(1, 1, new string[] { "Name", "Age" }, exc.TableHeaderCellStyleSheet);
-                            exc.WriteData(2, 1, new string[][] { new[] { "Henry", "1" }, new[] { "Hello world", "2" } }, exc.TableBodyCellStyleSheet);
+                            exc.WriteData(1, 1, new string[] { "Name", "Age" }, exc.TableHeaderCellStyleIndex);
+                            exc.WriteData(2, 1, new string[][] { new[] { "Henry", "1" }, new[] { "Hello world", "2" } }, exc.TableBodyCellStyleIndex);
 
                             exc.WriteTable(5, 1, new[] { "Name", "Age" }, new string[][] { new[] { "Henry", "1" }, new[] { "Hello world", "2" } });
                         }
