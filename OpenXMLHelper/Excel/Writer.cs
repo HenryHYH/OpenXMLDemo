@@ -12,9 +12,9 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using System.Drawing;
 
-namespace OpenXMLHelper
+namespace OpenXMLHelper.Excel
 {
-    public class OpenXMLExcel : IDisposable
+    public class Writer : IDisposable
     {
         #region Constrution and dispose
 
@@ -31,7 +31,7 @@ namespace OpenXMLHelper
 
         Stylesheet stylesheet;
 
-        public OpenXMLExcel(Stream stream)
+        public Writer(Stream stream)
         {
             spreadSheet = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             WorkbookPart workbookPart = spreadSheet.AddWorkbookPart();
@@ -131,17 +131,17 @@ namespace OpenXMLHelper
             }
         }
 
-        public void WriteData<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null)
+        public void WriteData<T>(int rowIndex, int columnIndex, T data, uint? styleIndex = null, int? rowSpan = null, int? columnSpan = null)
         {
-            WriteData(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex);
+            WriteData(rowIndex, columnIndex, new T[][] { new T[] { data } }, styleIndex, rowSpan, columnSpan);
         }
 
-        public void WriteData<T>(int rowIndex, int columnIndex, T[] data, uint? styleIndex = null)
+        public void WriteData<T>(int rowIndex, int columnIndex, T[] data, uint? styleIndex = null, int? rowSpan = null, int? columnSpan = null)
         {
-            WriteData(rowIndex, columnIndex, new T[][] { data }, styleIndex);
+            WriteData(rowIndex, columnIndex, new T[][] { data }, styleIndex, rowSpan, columnSpan);
         }
 
-        public void WriteData<T>(int rowIndex, int columnIndex, T[][] data, uint? styleIndex = null)
+        public void WriteData<T>(int rowIndex, int columnIndex, T[][] data, uint? styleIndex = null, int? rowSpan = null, int? columnSpan = null)
         {
             if (rowIndex < 1) rowIndex = 1;
             if (columnIndex < 1) columnIndex = 1;
@@ -176,6 +176,15 @@ namespace OpenXMLHelper
                     j++;
                 }
                 i++;
+            }
+
+            if (rowSpan.HasValue || columnSpan.HasValue)
+            {
+                int rs = rowSpan.HasValue ? rowSpan.Value : 1;
+                int cs = columnSpan.HasValue ? columnSpan.Value : 1;
+                if (rs < 1) rs = 1;
+                if (cs < 1) cs = 1;
+                MergeTwoCells(rowIndex, columnIndex, rowIndex + rs - 1, columnIndex + cs - 1);
             }
         }
 
@@ -372,7 +381,7 @@ namespace OpenXMLHelper
 
         private uint AddNumberCellStyleIndex()
         {
-            return AddStyleSheet(numberingFormat: new ExcelNumberingFormat() { NumberingFormatCategory = ExcelNumberingFormat.ExcelNumberingFormatCategory.Number }, align: new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Center });
+            return AddStyleSheet(numberingFormat: new ExcelNumberingFormat() { NumberingFormatCategory = ExcelNumberingFormat.ExcelNumberingFormatCategory.Number }, align: new ExcelAlign() { Horizontal = ExcelAlign.ExcelAlignHorizontalValue.Right });
         }
 
         #endregion

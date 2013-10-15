@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ExcelPage.aspx" />
+    <Content Include="ExcelReader.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +62,13 @@
     </Compile>
     <Compile Include="ExcelPage.aspx.designer.cs">
       <DependentUpon>ExcelPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ExcelReader.aspx.cs">
+      <DependentUpon>ExcelReader.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ExcelReader.aspx.designer.cs">
+      <DependentUpon>ExcelReader.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
