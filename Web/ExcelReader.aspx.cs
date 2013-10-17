@@ -12,7 +12,10 @@ namespace Web
         protected void Page_Load(object sender, EventArgs e)
         {
             string fileName = @"F:\example\B.xlsx";
-            pMessage.InnerHtml = OpenXMLHelper.Excel.Reader.Read(fileName);            
+            using (var reader = new OpenXMLHelper.Excel.Reader(fileName))
+            {
+                var dt = reader.Read();
+            }
         }
     }
 }
