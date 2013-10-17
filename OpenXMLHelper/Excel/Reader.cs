@@ -77,6 +77,16 @@ namespace OpenXMLHelper.Excel
             return dt;
         }
 
+        public static DataTable Read(string path, string sheetName = null)
+        {
+            DataTable dt = new DataTable();
+            using (var reader = new Reader(path))
+            {
+                dt = reader.Read(sheetName);
+            }
+            return dt;
+        }
+
         #endregion
 
         #region Private static methods
